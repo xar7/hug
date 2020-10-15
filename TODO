@@ -1,0 +1,10 @@
+* TODO BASIC STUFF
+** TODO Very minimal loading
+   Launch inferior binary and ptrace it.
+** TODO Simple user shell for debugger
+   Just like the cmdline of gdb : being capable of parsing user input and do the correct things asked.
+** TODO Simple breakpoint
+   Being able to break into a memory address and read values of registers
+   Instruction to handle:
+*** ni
+*** p
