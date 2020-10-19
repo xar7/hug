@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "debugger.h"
+#include "debugger.hh"
 
 int main(int argc, char **argv) {
     std::cout << "hug" << std::endl;
@@ -13,6 +13,7 @@ int main(int argc, char **argv) {
 
     Debugger d(argv[1]);
     d.start_inferior();
+    d.add_breakpoint(0x1119);
     d.wait_inferior();
     d.continue_inferior();
     d.wait_inferior();
