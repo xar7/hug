@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "debugger.hh"
+#include "elfparser.hh"
 
 int main(int argc, char **argv) {
     std::cout << "hug" << std::endl;
@@ -17,6 +18,10 @@ int main(int argc, char **argv) {
     d.wait_inferior();
     d.continue_inferior();
     d.wait_inferior();
+
+    ElfParser p(argv[1]);
+    p.init();
+    p.destroy();
 
     return 0;
 }

@@ -1,6 +1,6 @@
 #pragma once
-#include <stdio.h>
 
+#include <stdio.h>
 // To be improved
 
 #if DEBUG
@@ -10,3 +10,7 @@
 #else
 #define LOG(...)
 #endif /* DEBUG */
+
+#define ERR(...) fprintf(stderr, "[hug][err] "); \
+    fprintf(stderr, __VA_ARGS__);                \
+    fprintf(stderr, "\n");
