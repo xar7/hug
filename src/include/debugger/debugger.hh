@@ -1,6 +1,8 @@
 #pragma once
 
 #include <sys/types.h>
+
+#include <string>
 #include <vector>
 
 #include "breakpoint.hh"
@@ -14,7 +16,11 @@ public:
     void start_inferior(void);
     void wait_inferior(void);
     void continue_inferior(void);
+
     void add_breakpoint(std::intptr_t address);
+    void add_breakpoint(std::string symbol_name);
+
+
     uint64_t get_register_value(reg r);
 
 private:
