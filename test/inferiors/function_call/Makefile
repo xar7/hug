@@ -1,9 +1,8 @@
 CC ?= gcc
-CFLAGS += -fno-pie
 
-BIN = simple
+BIN = function_call
 
 all: $(BIN)
 
-clea:
+clean:
 	rm -rf $(BIN)

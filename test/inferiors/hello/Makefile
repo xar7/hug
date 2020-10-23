@@ -1,6 +1,8 @@
 CC ?= gcc
-CFLAGS += -fno-pie
 
 BIN = hello
 
 all: $(BIN)
+
+clean:
+	rm -rf $(BIN)
