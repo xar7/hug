@@ -3,6 +3,8 @@
 #include <elf.h>
 #include <link.h>
 
+#include <memory>
+
 class ElfParser {
 public:
     ElfParser(std::string elf_path) : path_(elf_path) {};
@@ -11,8 +13,9 @@ public:
        - check the elf magic number
        - get addresses of differents sections */
     int init(void);
-
     void destroy(void);
+
+    std::shared_ptr<ElfW(Sym)> get_symbol(std::string symbol_name);
 
 private:
     std::string path_;
@@ -23,5 +26,8 @@ private:
     ElfW(Phdr) *phdr_;
     ElfW(Shdr) *shdr_;
     ElfW(Sym) *symtab_;
+    ElfW(Shdr) *symtabhdr_;
+    char *strtab_;
+    ElfW(Shdr) *strtabhdr_;
 
 };

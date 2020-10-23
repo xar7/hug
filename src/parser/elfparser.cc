@@ -36,8 +36,12 @@ int ElfParser::init(void) {
     /* Find the symtable */
     for (auto i = 0; i < ehdr_->e_shnum; i++) {
         if (shdr_[i].sh_type == SHT_SYMTAB) {
+            symtabhdr_ = &shdr_[i];
             symtab_ = reinterpret_cast<ElfW(Sym) *>(reinterpret_cast<char *>(ehdr_) + shdr_[i].sh_offset);
-            break;
+        }
+        if (shdr_[i].sh_type == SHT_STRTAB) {
+            strtabhdr_ = &shdr_[i];
+            strtab_ = reinterpret_cast<char *>((ehdr_) + shdr_[i].sh_offset);
         }
     }
 
@@ -53,4 +57,13 @@ int ElfParser::init(void) {
 void ElfParser::destroy(void) {
     // XXX yeye check error codes
     munmap(ehdr_, sizeof(ElfW(Ehdr)));
+}
+
+std::shared_ptr<ElfW(Sym)> ElfParser::get_symbol(std::string symbol_name) {
+    for (size_t i = 0; i < symtabhdr_->sh_size; i += sizeof(ElfW(Sym))) {
+        if (symbol_name.compare(reinterpret_cast<char *>(strtab_[symtab_[i].st_name])) == 0)
+            return std::make_shared<ElfW(Sym)>(symtab_[i]);
+    }
+
+    return nullptr;
 }
