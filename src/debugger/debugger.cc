@@ -2,6 +2,7 @@
 #include <link.h>
 #include <unistd.h>
 #include <iostream>
+#include <sys/personality.h>
 #include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/wait.h>
@@ -13,6 +14,8 @@
 
 #define REG_FROM_REGTABLE(regtable, reg)        \
     reinterpret_cast<uint64_t *>(&regtable)[reg]
+
+#define GET_CURRENT_PERSONALITY (0xffffffff)
 
 void Debugger::start_inferior(void) {
     pid_t pid;
@@ -27,6 +30,10 @@ void Debugger::start_inferior(void) {
         if (ptrace(PTRACE_TRACEME, 0, nullptr, nullptr) < 0)
             std::cerr << "ptrace TRACEME request failed!" << std::endl;
 
+        /* Disable ASLR in the child */
+        int current_personality = personality(GET_CURRENT_PERSONALITY);
+        personality(current_personality | ADDR_NO_RANDOMIZE);
+
         char *const arg[2] = { binary_path_, nullptr };
         if (execvp(arg[0], arg))
             std::cerr << "execvp failed!" << std::endl;
@@ -39,7 +46,7 @@ void Debugger::start_inferior(void) {
 
 uint64_t Debugger::get_register_value(reg r) const {
     user_regs_struct regs;
-    ptrace(PTRACE_GETREGS, inferior_pid_, NULL, &regs);
+    ptrace(PTRACE_GETREGS, inferior_pid_, nullptr, &regs);
     return REG_FROM_REGTABLE(regs, r);
 }
 
@@ -58,7 +65,8 @@ void Debugger::wait_inferior(void) {
         LOG("inferior got stopped by signal `%s`.", utils::signalstr[WSTOPSIG(wstatus_) - 1].c_str());
         LOG("rip is at %p", (void *) get_register_value(reg::rip));
         if (WSTOPSIG(wstatus_) == SIGTRAP) {
-            auto bp = std::find(breakpoints_.begin(), breakpoints_.end(), get_register_value(reg::rip));
+            auto bp = std::find(breakpoints_.begin(), breakpoints_.end(), get_register_value(reg::rip)- 1
+                );
             if (bp != breakpoints_.end()) {
                 bp->unset();
                 LOG("inferior hit a breakpoint");

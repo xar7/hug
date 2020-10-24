@@ -16,7 +16,7 @@ void Breakpoint::unset(void) const {
 }
 
 bool Breakpoint::operator==(std::intptr_t addr) {
-    return addr_ + 1 == addr;
+    return addr_ == addr;
 }
 
 std::intptr_t Breakpoint::get_addr(void) const {
