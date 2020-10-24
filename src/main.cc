@@ -14,7 +14,11 @@ int main(int argc, char **argv) {
 
     Debugger d(argv[1]);
     d.start_inferior();
-    d.add_breakpoint(0x1119);
+    d.wait_inferior();
+    d.add_breakpoint(0x40110d);
+    d.continue_inferior();
+    d.wait_inferior();
+    d.continue_inferior();
     d.wait_inferior();
     d.continue_inferior();
     d.wait_inferior();
@@ -22,7 +26,7 @@ int main(int argc, char **argv) {
     ElfParser p(argv[1]);
     p.init();
     auto sym_main = p.get_symbol("main");
-    std::cout << "main=" << sym_main->st_value << std::endl;
+    std::cout << "main=" << std::hex << "0x" <<sym_main->st_value << std::endl;
     p.destroy();
 
     return 0;

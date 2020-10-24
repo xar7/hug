@@ -1,5 +1,6 @@
 #pragma once
 
+#include <link.h>
 #include <sys/types.h>
 
 #include <string>
@@ -21,7 +22,8 @@ public:
     void add_breakpoint(std::string symbol_name);
 
 
-    uint64_t get_register_value(reg r);
+    uint64_t get_register_value(reg r) const;
+    void set_register_value(reg r, std::intptr_t value) const;
 
 private:
     int wstatus_ = 0;
