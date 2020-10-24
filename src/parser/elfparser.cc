@@ -30,18 +30,20 @@ int ElfParser::init(void) {
         return 1;
     }
 
-    phdr_ = reinterpret_cast<ElfW(Phdr) *>(reinterpret_cast<char *>(ehdr_) + ehdr_->e_shoff);
+    phdr_ = reinterpret_cast<ElfW(Phdr) *>(reinterpret_cast<char *>(ehdr_) + ehdr_->e_phoff);
     shdr_ = reinterpret_cast<ElfW(Shdr) *>(reinterpret_cast<char *>(ehdr_) + ehdr_->e_shoff);
+    shstrtab_ = reinterpret_cast<char *>(reinterpret_cast<char *>(ehdr_) + shdr_[ehdr_->e_shstrndx].sh_offset);
 
-    /* Find the symtable */
     for (auto i = 0; i < ehdr_->e_shnum; i++) {
-        if (shdr_[i].sh_type == SHT_SYMTAB) {
+        if (shdr_[i].sh_type == SHT_SYMTAB
+            && std::string(".symtab").compare(&shstrtab_[shdr_[i].sh_name]) == 0) {
             symtabhdr_ = &shdr_[i];
             symtab_ = reinterpret_cast<ElfW(Sym) *>(reinterpret_cast<char *>(ehdr_) + shdr_[i].sh_offset);
         }
-        if (shdr_[i].sh_type == SHT_STRTAB) {
+        if (shdr_[i].sh_type == SHT_STRTAB
+            && std::string(".strtab").compare(&shstrtab_[shdr_[i].sh_name]) == 0) {
             strtabhdr_ = &shdr_[i];
-            strtab_ = reinterpret_cast<char *>((ehdr_) + shdr_[i].sh_offset);
+            strtab_ = reinterpret_cast<char *>(reinterpret_cast<char *>(ehdr_) + shdr_[i].sh_offset);
         }
     }
 
@@ -55,13 +57,13 @@ int ElfParser::init(void) {
 }
 
 void ElfParser::destroy(void) {
-    // XXX yeye check error codes
+    /* XXX yeye check error codes */
     munmap(ehdr_, sizeof(ElfW(Ehdr)));
 }
 
 std::shared_ptr<ElfW(Sym)> ElfParser::get_symbol(std::string symbol_name) {
-    for (size_t i = 0; i < symtabhdr_->sh_size; i += sizeof(ElfW(Sym))) {
-        if (symbol_name.compare(reinterpret_cast<char *>(strtab_[symtab_[i].st_name])) == 0)
+    for (size_t i = 0; i < symtabhdr_->sh_size / symtabhdr_->sh_entsize; i++) {
+        if (symbol_name.compare(&strtab_[symtab_[i].st_name]) == 0)
             return std::make_shared<ElfW(Sym)>(symtab_[i]);
     }
 

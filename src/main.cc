@@ -21,6 +21,8 @@ int main(int argc, char **argv) {
 
     ElfParser p(argv[1]);
     p.init();
+    auto sym_main = p.get_symbol("main");
+    std::cout << "main=" << sym_main->st_value << std::endl;
     p.destroy();
 
     return 0;

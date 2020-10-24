@@ -28,6 +28,7 @@ private:
     ElfW(Sym) *symtab_;
     ElfW(Shdr) *symtabhdr_;
     char *strtab_;
+    char *shstrtab_;
     ElfW(Shdr) *strtabhdr_;
 
 };
