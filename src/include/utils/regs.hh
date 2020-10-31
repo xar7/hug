@@ -1,5 +1,8 @@
 #pragma once
 
+#define REG_FROM_REGTABLE(regtable, reg)        \
+    reinterpret_cast<uint64_t *>(&regtable)[reg]
+
 enum reg {
     r15 = 0,
     r14,

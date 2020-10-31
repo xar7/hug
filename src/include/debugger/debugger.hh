@@ -7,12 +7,15 @@
 #include <vector>
 
 #include "breakpoint.hh"
+#include "mapping.hh"
 #include "regs.hh"
 
 class Debugger {
 public:
     Debugger(char *binary_path) : binary_path_(binary_path) {};
     ~Debugger() = default;
+
+    void get_memory_mapping();
 
     void start_inferior(void);
     void wait_inferior(void);
@@ -30,5 +33,6 @@ private:
     pid_t inferior_pid_;
     char *binary_path_;
 
+    std::vector<Mapping> mappings_;
     std::vector<Breakpoint> breakpoints_;
 };

@@ -10,4 +10,5 @@ target_link_libraries(hug
 target_include_directories(hug
   PRIVATE ${CMAKE_SOURCE_DIR}/src/include/debugger
   PRIVATE ${CMAKE_SOURCE_DIR}/src/include/parser
-  PRIVATE ${CMAKE_SOURCE_DIR}/src/include/utils)
+  PRIVATE ${CMAKE_SOURCE_DIR}/src/include/utils
+  PRIVATE ${CMAKE_SOURCE_DIR}/src/include/memory)

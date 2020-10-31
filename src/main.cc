@@ -1,5 +1,8 @@
 #include <iostream>
+#include <elf.h>
+#include <link.h>
 
+#include "mapping.hh"
 #include "debugger.hh"
 #include "elfparser.hh"
 
@@ -14,6 +17,7 @@ int main(int argc, char **argv) {
 
     Debugger d(argv[1]);
     d.start_inferior();
+    d.get_memory_mapping();
     d.wait_inferior();
     d.add_breakpoint(0x40110d);
     d.continue_inferior();
