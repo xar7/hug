@@ -18,6 +18,8 @@
 #define GET_CURRENT_PERSONALITY (0xffffffff)
 
 void Debugger::start_inferior(void) {
+    LOG("Initializing elf parser for : %s.", bin_path_);
+    elf_.init();
     pid_t pid;
 
     pid = fork();
@@ -34,8 +36,8 @@ void Debugger::start_inferior(void) {
         int current_personality = personality(GET_CURRENT_PERSONALITY);
         personality(current_personality | ADDR_NO_RANDOMIZE);
 
-        char *const arg[2] = { binary_path_, nullptr };
-        if (execvp(arg[0], arg))
+        char *const arg[2] = { bin_path_, nullptr };
+        if (execv(arg[0], arg))
             std::cerr << "execvp failed!" << std::endl;
     }
     else {
@@ -85,6 +87,8 @@ void Debugger::get_memory_mapping() {
         iss >> token;
         /* XXX Use inode */
         iss >> m.name_;
+
+        mappings_.push_back(std::move(m));
     }
 
     return;
@@ -131,9 +135,25 @@ void Debugger::continue_inferior(void) {
     ptrace(PTRACE_CONT, inferior_pid_, nullptr, nullptr);
 }
 
-void Debugger::add_breakpoint(std::intptr_t address) {
+void Debugger::add_breakpoint(std::uintptr_t address) {
     auto data = ptrace(PTRACE_PEEKDATA, inferior_pid_, address, NULL);
     auto bp = Breakpoint(inferior_pid_, address, static_cast<uint8_t>(data & 0xff));
     bp.set();
     breakpoints_.push_back(std::move(bp));
+}
+
+void Debugger::add_breakpoint(std::string symbol_name) {
+    auto sym = elf_.get_symbol(symbol_name);
+    if (!sym) {
+        std::cerr << "Unable to locate symbol " << symbol_name << "in" << bin_path_ << std::endl;
+        return;
+    }
+
+    std::uintptr_t address = sym->st_value;
+    if (elf_.is_pie()) {
+        auto mapping = std::find(mappings_.begin(), mappings_.end(), bin_path_);
+        address += mapping->begin_;
+    }
+
+    return add_breakpoint(address);
 }

@@ -17,6 +17,8 @@ public:
 
     std::shared_ptr<ElfW(Sym)> get_symbol(std::string symbol_name);
 
+    bool is_pie(void);
+
 private:
     std::string path_;
 

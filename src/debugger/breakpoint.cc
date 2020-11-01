@@ -15,7 +15,7 @@ void Breakpoint::unset(void) const {
     ptrace(PTRACE_POKEDATA, pid_, addr_, ((data & ~0xff) | data_));
 }
 
-bool Breakpoint::operator==(std::intptr_t addr) {
+bool Breakpoint::operator==(const std::uintptr_t& addr) const {
     return addr_ == addr;
 }
 

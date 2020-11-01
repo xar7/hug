@@ -1,9 +1,10 @@
 #pragma once
-
+#include <string>
 #include <sys/types.h>
 
 class Mapping {
 public:
+    bool operator==(const std::string& name) const;
     pid_t pid_;
     std::string name_;
     std::uintptr_t begin_;

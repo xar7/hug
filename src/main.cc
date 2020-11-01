@@ -17,9 +17,9 @@ int main(int argc, char **argv) {
 
     Debugger d(argv[1]);
     d.start_inferior();
-    d.get_memory_mapping();
     d.wait_inferior();
-    d.add_breakpoint(0x40110d);
+    d.get_memory_mapping();
+    d.add_breakpoint("main");
     d.continue_inferior();
     d.wait_inferior();
     d.continue_inferior();

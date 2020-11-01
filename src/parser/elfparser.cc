@@ -69,3 +69,7 @@ std::shared_ptr<ElfW(Sym)> ElfParser::get_symbol(std::string symbol_name) {
 
     return nullptr;
 }
+
+bool ElfParser::is_pie(void) {
+    return ehdr_->e_type == ET_DYN;
+}

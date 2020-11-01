@@ -1,11 +1,13 @@
 add_subdirectory(debugger/)
 add_subdirectory(parser/)
+add_subdirectory(memory/)
 
 add_executable(hug main.cc)
 
 target_link_libraries(hug
   PRIVATE debugger
-  PRIVATE parser)
+  PRIVATE parser
+  PRIVATE memory)
 
 target_include_directories(hug
   PRIVATE ${CMAKE_SOURCE_DIR}/src/include/debugger
