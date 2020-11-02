@@ -1,35 +1,5 @@
+#pragma once
+
 namespace utils {
-    std::string signalstr[31] = {
-        "SIGHUP",
-        "SIGINT",
-        "SIGQUIT",
-        "SIGILL",
-        "SIGTRAP",
-        "SIGABRT",
-        "SIGBUS",
-        "SIGFPE",
-        "SIGKILL",
-        "SIGUSR1",
-        "SIGSEGV",
-        "SIGUSR2",
-        "SIGPIPE",
-        "SIGALRM",
-        "SIGTERM",
-        "SIGSTKFLT",
-        "SIGCHLD",
-        "SIGCONT",
-        "SIGSTOP",
-        "SIGTSTP",
-        "SIGTTIN",
-        "SIGTTOU",
-        "SIGURG",
-        "SIGXCPU",
-        "SIGXFSZ",
-        "SIGVTALRM",
-        "SIGPROF",
-        "SIGWINCH",
-        "SIGIO",
-        "SIGPWR",
-        "SIGSYS"
-    };
+    extern std::string signalstr[31];
 }

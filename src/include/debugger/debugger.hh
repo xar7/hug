@@ -3,17 +3,19 @@
 #include <link.h>
 #include <sys/types.h>
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
 #include "breakpoint.hh"
 #include "elfparser.hh"
 #include "mapping.hh"
+#include "utils.hh"
 #include "regs.hh"
 
 class Debugger {
 public:
-    Debugger(char *binary_path) : bin_path_(binary_path), elf_(binary_path) {};
+    Debugger(char *binary_name) : bin_path_(binary_name), bin_name_(binary_name), elf_(binary_name) {};
     ~Debugger() = default;
 
     void get_memory_mapping();
@@ -32,7 +34,8 @@ public:
 private:
     int wstatus_ = 0;
     pid_t inferior_pid_;
-    char *bin_path_;
+    std::filesystem::path bin_path_;
+    char *bin_name_;
 
     ElfParser elf_;
 

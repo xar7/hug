@@ -24,8 +24,6 @@ int main(int argc, char **argv) {
     d.wait_inferior();
     d.continue_inferior();
     d.wait_inferior();
-    d.continue_inferior();
-    d.wait_inferior();
 
     ElfParser p(argv[1]);
     p.init();

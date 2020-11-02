@@ -12,13 +12,12 @@
 #include "debugger.hh"
 #include "log.hh"
 #include "mapping.hh"
-#include "utils.hh"
 #include "regs.hh"
 
 #define GET_CURRENT_PERSONALITY (0xffffffff)
 
 void Debugger::start_inferior(void) {
-    LOG("Initializing elf parser for : %s.", bin_path_);
+    LOG("Initializing elf parser for : %s.", bin_name_);
     elf_.init();
     pid_t pid;
 
@@ -36,7 +35,7 @@ void Debugger::start_inferior(void) {
         int current_personality = personality(GET_CURRENT_PERSONALITY);
         personality(current_personality | ADDR_NO_RANDOMIZE);
 
-        char *const arg[2] = { bin_path_, nullptr };
+        char *const arg[2] = { bin_name_, nullptr };
         if (execv(arg[0], arg))
             std::cerr << "execvp failed!" << std::endl;
     }
@@ -151,7 +150,8 @@ void Debugger::add_breakpoint(std::string symbol_name) {
 
     std::uintptr_t address = sym->st_value;
     if (elf_.is_pie()) {
-        auto mapping = std::find(mappings_.begin(), mappings_.end(), bin_path_);
+        auto mapping = std::find(mappings_.begin(), mappings_.end(),
+                                 std::filesystem::absolute(bin_path_).string());
         address += mapping->begin_;
     }
 
