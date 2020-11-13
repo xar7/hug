@@ -29,7 +29,7 @@ public:
 
 
     uint64_t get_register_value(reg r) const;
-    void set_register_value(reg r, std::intptr_t value) const;
+    void set_register_value(reg r, std::uintptr_t value) const;
 
 private:
     int wstatus_ = 0;

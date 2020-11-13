@@ -100,7 +100,7 @@ uint64_t Debugger::get_register_value(reg r) const {
 }
 
 // XXX yeyeye check error code
-void Debugger::set_register_value(reg r, std::intptr_t value) const {
+void Debugger::set_register_value(reg r, std::uintptr_t value) const {
     user_regs_struct regs;
     ptrace(PTRACE_GETREGS, inferior_pid_, nullptr, &regs);
     REG_FROM_REGTABLE(regs, r) = value;
@@ -120,7 +120,11 @@ void Debugger::wait_inferior(void) {
                 bp->unset();
                 LOG("inferior hit a breakpoint");
                 set_register_value(reg::rip, bp->get_addr());
-                ptrace(PTRACE_SINGLESTEP, inferior_pid_, nullptr, nullptr);
+                LOG("After setting rip to bp addr rip is now at %p.", (void *) get_register_value(reg::rip));
+                if (ptrace(PTRACE_SINGLESTEP, inferior_pid_, 0, 0) < 0)
+                    std::cerr << "ptrace failure !" << std::endl;
+                uint64_t rip_value = get_register_value(reg::rip);
+                LOG("After single steping rip is now at %p.", (void *) rip_value);
                 bp->set();
             }
         }

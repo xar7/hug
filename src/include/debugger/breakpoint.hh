@@ -15,7 +15,7 @@ public:
 
     bool operator==(const std::uintptr_t& addr) const;
 
-    std::intptr_t get_addr(void) const;
+    std::uintptr_t get_addr(void) const;
 
 private:
     pid_t pid_;
