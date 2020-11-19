@@ -12,3 +12,5 @@ public:
     std::uintptr_t offset_;
     uint8_t perm;
 };
+
+std::ostream& operator<<(std::ostream& o, const Mapping& m);

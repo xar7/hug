@@ -93,6 +93,13 @@ void Debugger::get_memory_mapping() {
     return;
 }
 
+void Debugger::dump_mapping() const {
+    std::cout << inferior_pid_ << '\n';
+    for (auto const& x : mappings_) {
+        std::cout << x << '\n';
+    }
+}
+
 uint64_t Debugger::get_register_value(reg r) const {
     user_regs_struct regs;
     ptrace(PTRACE_GETREGS, inferior_pid_, nullptr, &regs);
