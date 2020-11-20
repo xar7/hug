@@ -1,5 +1,6 @@
 add_library(debugger
   debugger.cc
+  process.cc
   breakpoint.cc)
 
 target_include_directories(debugger
