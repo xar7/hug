@@ -72,10 +72,7 @@ void Debugger::get_memory_mapping() {
         m.end_ = std::stoul(token.substr(split_index + 1, token.size()), 0, 16);
 
 
-        iss >> token;
-        /* token contains permission string */
-        m.perm_ = token;
-
+        iss >> m.perm_;
         iss >> m.offset_;
         iss >> token;
         /* XXX Use device */
