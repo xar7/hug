@@ -5,6 +5,7 @@
 #include "mapping.hh"
 #include "debugger.hh"
 #include "elfparser.hh"
+#include "utils.hh"
 
 int main(int argc, char **argv) {
     std::cout << "hug" << std::endl;

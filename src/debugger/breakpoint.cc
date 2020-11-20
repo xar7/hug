@@ -3,16 +3,14 @@
 #include "breakpoint.hh"
 
 void Breakpoint::set(void) {
-    auto data = ptrace(PTRACE_PEEKDATA, pid_, addr_, nullptr);
+    auto data = p_.peek_data(addr_);
     data_ = static_cast<uint8_t>(data & 0xff);
-
-    ptrace(PTRACE_POKEDATA, pid_, addr_, ((data & ~0xff) | 0xcc));
+    p_.poke_data(addr_, ((data & ~0xff) | 0xcc));
 }
 
 void Breakpoint::unset(void) const {
-    auto data = ptrace(PTRACE_PEEKDATA, pid_, addr_, nullptr);
-
-    ptrace(PTRACE_POKEDATA, pid_, addr_, ((data & ~0xff) | data_));
+    auto data = p_.peek_data(addr_);
+    p_.poke_data(addr_, ((data & ~0xff) | data_));
 }
 
 bool Breakpoint::operator==(const std::uintptr_t& addr) const {

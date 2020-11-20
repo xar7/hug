@@ -5,9 +5,11 @@
 
 #include <sys/types.h>
 
+#include "process.hh"
+
 class Breakpoint {
 public:
-    Breakpoint(pid_t pid, std::uintptr_t address, uint8_t data) : pid_(pid), addr_(address), data_(data) {};
+    Breakpoint(const Process &p, std::uintptr_t address, uint8_t data) : p_(p), addr_(address), data_(data) {};
     ~Breakpoint() = default;
 
     void set(void);
@@ -18,7 +20,7 @@ public:
     std::uintptr_t get_addr(void) const;
 
 private:
-    pid_t pid_;
+    Process p_;
     std::uintptr_t addr_;
     uint8_t data_;
 };

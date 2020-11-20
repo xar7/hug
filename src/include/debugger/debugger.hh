@@ -10,6 +10,7 @@
 #include "breakpoint.hh"
 #include "elfparser.hh"
 #include "mapping.hh"
+#include "process.hh"
 #include "utils.hh"
 #include "regs.hh"
 
@@ -25,20 +26,21 @@ public:
     void wait_inferior(void);
     void continue_inferior(void);
 
+    void routine(void);
+
     void add_breakpoint(std::uintptr_t address);
     void add_breakpoint(std::string symbol_name);
 
 
     uint64_t get_register_value(reg r) const;
-    void set_register_value(reg r, std::uintptr_t value) const;
+    void set_register_value(reg r, std::uintptr_t value);
 
 private:
-    int wstatus_ = 0;
-    pid_t inferior_pid_;
     std::filesystem::path bin_path_;
     char *bin_name_;
 
     ElfParser elf_;
+    Process inf_;
 
     std::vector<Mapping> mappings_;
     std::vector<Breakpoint> breakpoints_;

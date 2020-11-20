@@ -4,14 +4,13 @@
 #include <link.h>
 #include <sstream>
 #include <sys/personality.h>
-#include <sys/ptrace.h>
-#include <sys/user.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
 #include "debugger.hh"
 #include "log.hh"
 #include "mapping.hh"
+#include "process.hh"
 #include "regs.hh"
 
 #define GET_CURRENT_PERSONALITY (0xffffffff)
@@ -41,7 +40,7 @@ void Debugger::start_inferior(void) {
     }
     else {
         /* Parent */
-        inferior_pid_ = pid;
+        inf_ = Process(pid);
     }
 }
 
@@ -49,7 +48,7 @@ void Debugger::get_memory_mapping() {
     /* Reading /proc/PID/task/PID/maps is faster than /proc/PID/maps
        check comment on gdb/linux-tdep.c:linux_vsyscall_range_raw */
     std::stringstream procfilename;
-    procfilename << "/proc/" << inferior_pid_ << "/task/" << inferior_pid_ << "/maps";
+    procfilename << "/proc/" << inf_.get_pid() << "/task/" << inf_.get_pid() << "/maps";
 
     std::ifstream procfile(procfilename.str());
     if (!procfile.is_open()) {
@@ -60,7 +59,7 @@ void Debugger::get_memory_mapping() {
     std::string line;
     while (std::getline(procfile, line)) {
         Mapping m;
-        m.pid_ = inferior_pid_;
+        m.pid_ = inf_.get_pid();
 
         std::istringstream iss(line);
         std::string token;
@@ -87,58 +86,51 @@ void Debugger::get_memory_mapping() {
 }
 
 void Debugger::dump_mapping(std::ostream& o) const {
-    o << "Memory mapping for process " <<  inferior_pid_ << '\n';
+    o << "Memory mapping for process " <<  inf_.get_pid() << '\n';
     for (auto const& x : mappings_) {
         std::cout << x << '\n';
     }
 }
 
 uint64_t Debugger::get_register_value(reg r) const {
-    user_regs_struct regs;
-    ptrace(PTRACE_GETREGS, inferior_pid_, nullptr, &regs);
-    return REG_FROM_REGTABLE(regs, r);
+    return inf_.get_register_value(r);
 }
 
-void Debugger::set_register_value(reg r, std::uintptr_t value) const {
-    user_regs_struct regs;
-    ptrace(PTRACE_GETREGS, inferior_pid_, nullptr, &regs);
-    REG_FROM_REGTABLE(regs, r) = value;
-    ptrace(PTRACE_SETREGS, inferior_pid_, nullptr, &regs);
+void Debugger::set_register_value(reg r, std::uintptr_t value) {
+    inf_.set_register_value(r, value);
 }
 
 void Debugger::wait_inferior(void) {
-    waitpid(inferior_pid_, &wstatus_, 0);
+    inf_.wait(0);
 
-    if (WIFSTOPPED(wstatus_)) {
-        LOG("inferior got stopped by signal `%s`.", utils::signalstr[WSTOPSIG(wstatus_) - 1].c_str());
+    if (inf_.get_status() == STOPPED) {
+        LOG("inferior got stopped by signal `%s`.", utils::signalstr[WSTOPSIG(inf_.get_wstatus()) - 1].c_str());
         LOG("rip is at %p", (void *) get_register_value(reg::rip));
-        if (WSTOPSIG(wstatus_) == SIGTRAP) {
+        if (WSTOPSIG(inf_.get_wstatus()) == SIGTRAP) {
             auto bp = std::find(breakpoints_.begin(), breakpoints_.end(),
                                 get_register_value(reg::rip) - 1);
             if (bp != breakpoints_.end()) {
                 bp->unset();
                 LOG("inferior hit a breakpoint");
                 set_register_value(reg::rip, bp->get_addr());
-                LOG("After setting rip to bp addr rip is now at %p.", (void *) get_register_value(reg::rip));
-                if (ptrace(PTRACE_SINGLESTEP, inferior_pid_, 0, 0) < 0)
-                    std::cerr << "ptrace failure !" << std::endl;
-                waitpid(inferior_pid_, &wstatus_, 0);
+                inf_.single_step();
+                inf_.wait(0);
                 bp->set();
             }
         }
     }
-    else if (WIFEXITED(wstatus_)) {
+    else if (inf_.get_status() == EXITED) {
         LOG("inferior exited");
     }
 }
 
 void Debugger::continue_inferior(void) {
-    ptrace(PTRACE_CONT, inferior_pid_, nullptr, nullptr);
+    return inf_.continue_exec();
 }
 
 void Debugger::add_breakpoint(std::uintptr_t address) {
-    auto data = ptrace(PTRACE_PEEKDATA, inferior_pid_, address, NULL);
-    auto bp = Breakpoint(inferior_pid_, address, static_cast<uint8_t>(data & 0xff));
+    auto data = inf_.peek_data(address);
+    auto bp = Breakpoint(inf_, address, static_cast<uint8_t>(data & 0xff));
     bp.set();
     breakpoints_.push_back(std::move(bp));
 }
