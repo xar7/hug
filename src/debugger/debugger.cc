@@ -99,7 +99,6 @@ uint64_t Debugger::get_register_value(reg r) const {
     return REG_FROM_REGTABLE(regs, r);
 }
 
-// XXX yeyeye check error code
 void Debugger::set_register_value(reg r, std::uintptr_t value) const {
     user_regs_struct regs;
     ptrace(PTRACE_GETREGS, inferior_pid_, nullptr, &regs);
@@ -123,8 +122,7 @@ void Debugger::wait_inferior(void) {
                 LOG("After setting rip to bp addr rip is now at %p.", (void *) get_register_value(reg::rip));
                 if (ptrace(PTRACE_SINGLESTEP, inferior_pid_, 0, 0) < 0)
                     std::cerr << "ptrace failure !" << std::endl;
-                uint64_t rip_value = get_register_value(reg::rip);
-                LOG("After single steping rip is now at %p.", (void *) rip_value);
+                waitpid(inferior_pid_, &wstatus_, 0);
                 bp->set();
             }
         }
@@ -156,6 +154,9 @@ void Debugger::add_breakpoint(std::string symbol_name) {
     if (elf_.is_pie()) {
         auto mapping = std::find(mappings_.begin(), mappings_.end(),
                                  std::filesystem::absolute(bin_path_).string());
+        if (mapping == mappings_.end()) {
+            ERR("Unable to find memory mapping for %s", std::filesystem::absolute(bin_path_).string().c_str());
+        }
         address += mapping->begin_;
     }
 
