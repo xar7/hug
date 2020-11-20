@@ -68,17 +68,13 @@ void Debugger::get_memory_mapping() {
         iss >> token;
         /* token contains BEGIN_ADDR-END_ADDR we have to split until - */
         auto split_index = token.find('-', 0);
-        m.begin_ = std::stoull(token.substr(0, split_index), 0, 16);
-        m.end_ = std::stoull(token.substr(split_index + 1, token.size()), 0, 16);
+        m.begin_ = std::stoul(token.substr(0, split_index), 0, 16);
+        m.end_ = std::stoul(token.substr(split_index + 1, token.size()), 0, 16);
+
 
         iss >> token;
         /* token contains permission string */
-        m.perm = 0;
-        for (size_t i = 0; i < 4; i++) {
-            if (token[i] != '-') {
-                m.perm |= (1 << i);
-            }
-        }
+        m.perm_ = token;
 
         iss >> m.offset_;
         iss >> token;
@@ -87,14 +83,14 @@ void Debugger::get_memory_mapping() {
         /* XXX Use inode */
         iss >> m.name_;
 
-        mappings_.push_back(std::move(m));
+        mappings_.push_back(m);
     }
 
     return;
 }
 
-void Debugger::dump_mapping() const {
-    std::cout << inferior_pid_ << '\n';
+void Debugger::dump_mapping(std::ostream& o) const {
+    o << "Memory mapping for process " <<  inferior_pid_ << '\n';
     for (auto const& x : mappings_) {
         std::cout << x << '\n';
     }

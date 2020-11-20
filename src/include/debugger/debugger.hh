@@ -19,7 +19,7 @@ public:
     ~Debugger() = default;
 
     void get_memory_mapping();
-    void dump_mapping() const;
+    void dump_mapping(std::ostream& o) const;
 
     void start_inferior(void);
     void wait_inferior(void);

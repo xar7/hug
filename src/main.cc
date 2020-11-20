@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     d.start_inferior();
     d.wait_inferior();
     d.get_memory_mapping();
-    d.dump_mapping();
+    d.dump_mapping(std::cout);
     d.add_breakpoint("main");
     d.continue_inferior();
     d.wait_inferior();

@@ -7,5 +7,5 @@ bool Mapping::operator==(const std::string& name) const {
 }
 
 std::ostream& operator<<(std::ostream& o, const Mapping& m) {
-    return o << std::hex << m.begin_ << '-' << std::hex << m.end_ << ' ' << m.perm << ' ' << m.offset_ << ' ' << m.name_;
+    return o << std::hex << m.begin_ << '-' << std::hex << m.end_ << ' ' << m.perm_ << ' ' << m.offset_ << ' ' << m.name_;
 }

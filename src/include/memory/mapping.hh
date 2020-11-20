@@ -10,7 +10,7 @@ public:
     std::uintptr_t begin_;
     std::uintptr_t end_;
     std::uintptr_t offset_;
-    uint8_t perm;
+    std::string perm_;
 };
 
 std::ostream& operator<<(std::ostream& o, const Mapping& m);
