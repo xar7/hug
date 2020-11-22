@@ -1,3 +1,5 @@
+add_compile_options(-Wno-unused-variable)
+
 add_library(utils
   utils.cc)
 

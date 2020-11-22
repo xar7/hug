@@ -11,6 +11,7 @@
 #include "log.hh"
 #include "mapping.hh"
 #include "process.hh"
+#include "utils.hh"
 #include "regs.hh"
 
 #define GET_CURRENT_PERSONALITY (0xffffffff)

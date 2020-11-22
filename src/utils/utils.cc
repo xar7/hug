@@ -1,10 +1,11 @@
+#include <array>
 #include <map>
 #include <string>
 
 #include <sys/ptrace.h>
 
 namespace utils {
-    std::string signalstr[31] = {
+    extern const std::array<std::string, 31> signalstr = {
         "SIGHUP",
         "SIGINT",
         "SIGQUIT",
@@ -38,7 +39,7 @@ namespace utils {
         "SIGSYS"
     };
 
-    std::map<enum __ptrace_request, std::string> ptrace_request_str = {
+    extern const std::map<enum __ptrace_request, std::string> ptrace_request_str = {
         {PTRACE_TRACEME, "PTRACE_TRACEME"},
         {PTRACE_PEEKTEXT, "PTRACE_PEEKTEXT"},
         {PTRACE_PEEKDATA, "PTRACE_PEEKDATA"},

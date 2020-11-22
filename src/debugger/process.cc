@@ -34,7 +34,7 @@ long Process::call_ptrace(enum __ptrace_request r, void *addr, void *data) const
     assert(status_ == STOPPED);
     long rc = ptrace(r, pid_, addr, data);
     if (rc == -1) {
-        ERR("ptrace error: ptrace(%s, %d, %p, %p)", utils::ptrace_request_str[r].c_str()
+        ERR("ptrace error: ptrace(%s, %d, %p, %p)", utils::ptrace_request_str.at(r).c_str()
             , pid_, addr, data);
         /* XXX Do something clever here */
     }
