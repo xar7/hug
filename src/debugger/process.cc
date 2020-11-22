@@ -30,7 +30,7 @@ int Process::get_wstatus(void) const {
 }
 
 long Process::call_ptrace(enum __ptrace_request r, void *addr, void *data) const {
-    /* Every ptrace called exposed by this class need our process to be stopped */
+    /* every ptrace functions exposed by this class need our process to be stopped */
     assert(status_ == STOPPED);
     long rc = ptrace(r, pid_, addr, data);
     if (rc == -1) {

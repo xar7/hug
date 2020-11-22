@@ -88,7 +88,7 @@ void Debugger::get_memory_mapping() {
 void Debugger::dump_mapping(std::ostream& o) const {
     o << "Memory mapping for process " <<  inf_.get_pid() << '\n';
     for (auto const& x : mappings_) {
-        std::cout << x << '\n';
+        o << x << '\n';
     }
 }
 
@@ -138,7 +138,11 @@ void Debugger::add_breakpoint(std::uintptr_t address) {
 void Debugger::add_breakpoint(std::string symbol_name) {
     auto sym = elf_.get_symbol(symbol_name);
     if (!sym) {
-        std::cerr << "Unable to locate symbol " << symbol_name << "in" << bin_path_ << std::endl;
+        ERR("Unable to locate symbol %s in %s.", symbol_name.c_str(), bin_path_.c_str());
+        return;
+    }
+    else if (ELF64_ST_TYPE(sym->st_info) != STT_FUNC) {
+        ERR("%s is not a function name.", symbol_name.c_str());
         return;
     }
 
@@ -147,7 +151,12 @@ void Debugger::add_breakpoint(std::string symbol_name) {
         auto mapping = std::find(mappings_.begin(), mappings_.end(),
                                  std::filesystem::absolute(bin_path_).string());
         if (mapping == mappings_.end()) {
-            ERR("Unable to find memory mapping for %s", std::filesystem::absolute(bin_path_).string().c_str());
+            ERR("Unable to find memory mapping for %s",
+                std::filesystem::absolute(bin_path_).string().c_str());
+            return;
+
+            /* XXX we should probably report the error the caller instead of
+               just returning */
         }
         address += mapping->begin_;
     }
