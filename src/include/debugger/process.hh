@@ -23,7 +23,8 @@ public:
 
     long call_ptrace(enum __ptrace_request r, void *addr, void *data) const;
     void set_register_value(reg r, std::uintptr_t value) const;
-    uint64_t get_register_value(reg r) const;
+    reg_t get_register_value(reg r) const;
+    std::array<reg_t, reg::reg_number> get_registers(void) const;
     void continue_exec(void);
     long peek_data(std::uintptr_t addr) const;
     void poke_data(std::uintptr_t addr, std::uintptr_t data) const;

@@ -32,8 +32,9 @@ public:
     void add_breakpoint(std::string symbol_name);
 
 
-    uint64_t get_register_value(reg r) const;
+    reg_t get_register_value(reg r) const;
     void set_register_value(reg r, std::uintptr_t value);
+    void dump_registers(std::ostream& o);
 
 private:
     std::filesystem::path bin_path_;

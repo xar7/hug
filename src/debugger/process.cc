@@ -49,7 +49,17 @@ void Process::set_register_value(reg r, std::uintptr_t value) const {
     call_ptrace(PTRACE_SETREGS, 0, &regs);
 }
 
-uint64_t Process::get_register_value(reg r) const {
+std::array<reg_t, reg::reg_number> Process::get_registers(void) const {
+    user_regs_struct regs;
+    call_ptrace(PTRACE_GETREGS, 0, &regs);
+    std::array<reg_t, reg::reg_number> reg_arr;
+    for (auto i = 0; i < reg_number; i++) {
+        reg_arr[i] = REG_FROM_REGTABLE(regs, i);
+    }
+    return reg_arr;
+}
+
+reg_t Process::get_register_value(reg r) const {
     user_regs_struct regs;
     call_ptrace(PTRACE_GETREGS, 0, &regs);
     return REG_FROM_REGTABLE(regs, r);

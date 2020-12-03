@@ -93,12 +93,20 @@ void Debugger::dump_mapping(std::ostream& o) const {
     }
 }
 
-uint64_t Debugger::get_register_value(reg r) const {
+reg_t Debugger::get_register_value(reg r) const {
     return inf_.get_register_value(r);
 }
 
 void Debugger::set_register_value(reg r, std::uintptr_t value) {
     inf_.set_register_value(r, value);
+}
+
+void Debugger::dump_registers(std::ostream& o) {
+    o << "register_dump for process " << inf_.get_pid() << '\n';
+    auto registers = inf_.get_registers();
+    for (const auto& r : utils::regs_str) {
+        o << '\t' << r.second << " : " << registers[r.first] << '\n';
+    }
 }
 
 void Debugger::wait_inferior(void) {

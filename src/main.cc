@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
     d.get_memory_mapping();
     d.dump_mapping(std::cout);
     d.add_breakpoint("add");
+    d.dump_registers(std::cout);
     d.continue_inferior();
     d.wait_inferior();
     d.continue_inferior();
