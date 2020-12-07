@@ -15,19 +15,20 @@ int ElfParser::init(void) {
     if (fd < 0) {
         ERR("ElfParser: Unable to open %s !", path_.c_str());
         perror("ElfParserError: ");
-        return fd;
+        return PARSER_INIT_FAIL;
     }
 
     struct stat stat_buf;
     if (fstat(fd, &stat_buf) < 0) {
         ERR("ElfParser: stat failed!");
+        return PARSER_INIT_FAIL;
     }
     size_ = stat_buf.st_size;
 
     ehdr_ = static_cast<ElfW(Ehdr) *>(mmap(NULL, stat_buf.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
     if (ehdr_ == MAP_FAILED) {
         ERR("ElfParser: mmap failed at mapping elf.");
-        return 1;
+        return PARSER_INIT_FAIL;
     }
 
     phdr_ = reinterpret_cast<ElfW(Phdr) *>(reinterpret_cast<char *>(ehdr_) + ehdr_->e_phoff);
@@ -50,10 +51,10 @@ int ElfParser::init(void) {
     if (close(fd) < 0) {
         ERR("ElfParser: close failed.");
         perror("ElfParserError: ");
-        return 1;
+        return PARSER_INIT_FAIL;
     }
 
-    return 0;
+    return PARSER_INIT_OK;
 }
 
 void ElfParser::destroy(void) {

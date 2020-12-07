@@ -5,6 +5,9 @@
 
 #include <memory>
 
+#define PARSER_INIT_OK 0
+#define PARSER_INIT_FAIL 1
+
 class ElfParser {
 public:
     ElfParser(std::string elf_path) : path_(elf_path) {};
@@ -18,10 +21,8 @@ public:
     std::shared_ptr<ElfW(Sym)> get_symbol(std::string symbol_name);
 
     bool is_pie(void);
-
-private:
     std::string path_;
-
+private:
     size_t size_;
 
     ElfW(Ehdr) *ehdr_;

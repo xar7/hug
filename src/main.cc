@@ -2,9 +2,10 @@
 #include <elf.h>
 #include <link.h>
 
-#include "mapping.hh"
 #include "debugger.hh"
+#include "dwarf.hh"
 #include "elf.hh"
+#include "mapping.hh"
 #include "utils.hh"
 
 int main(int argc, char **argv) {
@@ -29,10 +30,18 @@ int main(int argc, char **argv) {
     d.wait_inferior();
 
     ElfParser p(argv[1]);
-    p.init();
+    if (p.init() == PARSER_INIT_FAIL) {
+        std::cerr << "ElfParser initialization failed." << std::endl;
+    }
     auto sym_main = p.get_symbol("main");
     std::cout << "main=" << std::hex << "0x" <<sym_main->st_value << std::endl;
     p.destroy();
+
+    DwarfParser dp(argv[1]);
+    if (dp.init() == PARSER_INIT_FAIL) {
+        std::cerr << "DwarfParser initialization failed." << std::endl;
+    }
+    dp.destroy();
 
     return 0;
 }
