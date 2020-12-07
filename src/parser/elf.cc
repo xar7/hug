@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-#include "elfparser.hh"
+#include "elf.hh"
 #include "log.hh"
 
 int ElfParser::init(void) {

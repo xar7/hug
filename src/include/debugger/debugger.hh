@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "breakpoint.hh"
-#include "elfparser.hh"
+#include "elf.hh"
 #include "mapping.hh"
 #include "process.hh"
 #include "utils.hh"

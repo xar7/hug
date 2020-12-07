@@ -12,8 +12,8 @@ public:
     /* Initialize parser state and check the binary :
        - check the elf magic number
        - get addresses of differents sections */
-    int init(void);
-    void destroy(void);
+    virtual int init(void);
+    virtual void destroy(void);
 
     std::shared_ptr<ElfW(Sym)> get_symbol(std::string symbol_name);
 

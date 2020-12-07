@@ -1,5 +1,6 @@
 add_library(parser
-  elfparser.cc)
+  dwarf.cc
+  elf.cc)
 
 target_include_directories(parser
   PRIVATE ${CMAKE_SOURCE_DIR}/src/include/parser

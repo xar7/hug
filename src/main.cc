@@ -4,7 +4,7 @@
 
 #include "mapping.hh"
 #include "debugger.hh"
-#include "elfparser.hh"
+#include "elf.hh"
 #include "utils.hh"
 
 int main(int argc, char **argv) {
