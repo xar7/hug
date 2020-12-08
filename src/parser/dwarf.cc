@@ -27,6 +27,11 @@ void DwarfParser::dies_traversal_rec(Dwarf_Debug dbg, Dwarf_Die die,
     }
 }
 
+// XXX As I am lazy and having troubles at finding good docs concernings
+//     libdwarf and the dwarf format, most of my parser logics is actually
+//     contained in this function which browse all of the dwarf dies and
+//     apply the handler function passed as arg to them.
+//     Yeyeye this is ugly but it works
 int DwarfParser::dies_traversal(dwarf_die_handler_ptr funcptr) {
     Dwarf_Unsigned cu_header_length = 0;
     Dwarf_Half  version;
@@ -42,6 +47,7 @@ int DwarfParser::dies_traversal(dwarf_die_handler_ptr funcptr) {
 
         if (res == DW_DLV_ERROR) {
             ERR("DwarfParserError: error in dwarf_next_cu_header during loading of DIEs.");
+            dwarf_errmsg(error_);
             return 1;
         }
         else if (res == DW_DLV_NO_ENTRY) {
@@ -80,17 +86,79 @@ int DwarfParser::init(void) {
 
     if (dwarf_init(fd_, DW_DLC_READ, errhand_, errarg_, &dbg_, &error_) != DW_DLV_OK) {
         ERR("DwarfParserError on dwarf_init call.");
+        dwarf_errmsg(error_);
         return PARSER_INIT_FAIL;
     }
 
+    // Browse all CU header and DIE to fill our custom line table.
+    // XXX This is extremely inefficient as we know where the CU DIEs are
+    //     (sibling of CU header) and don't have to browse everything.
+    dies_traversal(std::bind(&DwarfParser::load_cu_line_table, this,
+                             std::placeholders::_1));
+
 
     return PARSER_INIT_OK;
+}
+
+int DwarfParser::load_cu_line_table(Dwarf_Die d) {
+    Dwarf_Half tag;
+    const char *tagname = NULL;
+    if (dwarf_tag(d, &tag, &error_) != DW_DLV_OK) {
+        ERR("DwarfParserError on dwarf_tag.");
+        dwarf_errmsg(error_);
+    }
+    if (dwarf_get_TAG_name(tag, &tagname) != DW_DLV_OK) {
+        ERR("DwarfParserError on dwarf_get_TAG_name.");
+        dwarf_errmsg(error_);
+    }
+
+    if (strcmp(tagname, "DW_TAG_compile_unit") != 0) {
+        return 0;
+    }
+
+    Dwarf_Line *lines;
+    Dwarf_Signed nlines;
+
+    if (dwarf_srclines(d, &lines, &nlines, &error_) != DW_DLV_OK) {
+        ERR("DwarfParserError on dwarf_srclines.");
+        dwarf_errmsg(error_);
+    }
+
+    for (auto i = 0; i < nlines; i++) {
+        Dwarf_Unsigned lineno;
+        Dwarf_Addr lineaddr;
+        if (dwarf_lineno(lines[i], &lineno, &error_) != DW_DLV_OK) {
+            ERR("DwarfParserError on dwarf_lineno.");
+            dwarf_errmsg(error_);
+        }
+        if (dwarf_lineaddr(lines[i], &lineaddr, &error_) != DW_DLV_OK) {
+            ERR("DwarfParserError on dwarf_lineaddr.");
+            dwarf_errmsg(error_);
+        }
+
+        line_table_[lineaddr] = lineno;
+    }
+
+    return 0;
+}
+
+void DwarfParser::dump_line_table(std::ostream& o) {
+    o << "Dumping line table for dwarf file : " << path_ << '\n';
+    for (const auto& x : line_table_) {
+        o << '(' << std::hex << x.first <<
+            ',' << std::dec << x.second << ')' << '\n';
+    }
+}
+
+line_number_t DwarfParser::get_associated_line(std::uintptr_t addr) {
+    
 }
 
 void DwarfParser::destroy(void) {
     // XXX Let's hope it doesn't fail since we don't have a return value.
     if (dwarf_finish(dbg_, &error_) != DW_DLV_OK) {
         ERR("DwarfParserError on dwarf_finish call.");
+        dwarf_errmsg(error_);
     }
 
     if (close(fd_) < 0) {
@@ -108,18 +176,9 @@ std::vector<Dwarf_Die> DwarfParser::get_dies_with_name(std::string name) {
                 dies.push_back(d);
         }
 
+        dwarf_dealloc(dbg_, die_name, DW_DLA_STRING);
         return 0;
     });
 
     return dies;
-}
-
-std::ostream& operator<<(std::ostream& o, Dwarf_Die d) {
-    char *die_name = NULL;
-    // XXX Not so sure about the use of NULL on Dwarf_Error
-    if (dwarf_diename(d, &die_name, NULL) == 0) {
-        o << die_name;
-    }
-
-    return o;
 }

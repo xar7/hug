@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 
+typedef unsigned long long line_number_t;
 
 namespace utils {
     extern const std::array<std::string, 31> signalstr;
