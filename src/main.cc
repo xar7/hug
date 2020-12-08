@@ -1,6 +1,7 @@
 #include <iostream>
 #include <elf.h>
 #include <link.h>
+#include <libdwarf/libdwarf.h>
 
 #include "debugger.hh"
 #include "dwarf.hh"
@@ -41,6 +42,13 @@ int main(int argc, char **argv) {
     if (dp.init() == PARSER_INIT_FAIL) {
         std::cerr << "DwarfParser initialization failed." << std::endl;
     }
+    dp.dies_traversal([&](Dwarf_Die d) -> int {
+        char *die_name = NULL;
+        if (dwarf_diename(d, &die_name, &dp.error_) == 0)
+            std::cout << die_name << '\n';
+
+        return 0;
+    });
     dp.destroy();
 
     return 0;

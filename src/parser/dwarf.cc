@@ -8,27 +8,25 @@
 #include "dwarf.hh"
 #include "log.hh"
 
-void DwarfParser::dies_traversal(Dwarf_Debug dbg, Dwarf_Die die) {
-    char *die_name = 0;
-    if (dwarf_diename(die, &die_name, &error_) == 0) {
-        std::cout << die_name << '\n';
-    }
+void DwarfParser::dies_traversal_rec(Dwarf_Debug dbg, Dwarf_Die die,
+        dwarf_die_handler_ptr funcptr) {
+    funcptr(die);
 
     Dwarf_Die child_die;
     int res = dwarf_child(die, &child_die, &error_);
     if (res == DW_DLV_OK) {
-        dies_traversal(dbg, child_die);
+        dies_traversal_rec(dbg, child_die, funcptr);
         Dwarf_Die current_die = child_die;
         Dwarf_Die sib_die = current_die;
         while (res == DW_DLV_OK) {
             current_die = sib_die;
             res = dwarf_siblingof(dbg, current_die, &sib_die, &error_);
-            dies_traversal(dbg, sib_die);
+            dies_traversal_rec(dbg, sib_die, funcptr);
         }
     }
 }
 
-int DwarfParser::load_all_dies(void) {
+int DwarfParser::dies_traversal(dwarf_die_handler_ptr funcptr) {
     Dwarf_Unsigned cu_header_length = 0;
     Dwarf_Half  version;
     Dwarf_Half address_size;
@@ -56,7 +54,7 @@ int DwarfParser::load_all_dies(void) {
             ERR("DwarfParserError: impossible to find CU DIE. This should be unreachable.");
         }
 
-        dies_traversal(dbg_, current_die);
+        dies_traversal_rec(dbg_, current_die, funcptr);
     }
 }
 
@@ -65,9 +63,8 @@ int DwarfParser::init(void) {
     //     instead of opening two times the file, I should do
     //     everything at the same time.
 
-    // XXX Also for now the parser parses all the DIE and store
-    //     the contents in a std::vector, this is non efficient
-    //     and I should change it with some lazy loading etc
+    // XXX Also some kind of lazy evaluation should be easy to
+    //     implement
 
     int rc = ElfParser::init();
     if (rc != PARSER_INIT_OK) {
@@ -85,9 +82,6 @@ int DwarfParser::init(void) {
         return PARSER_INIT_FAIL;
     }
 
-    if (load_all_dies() != 0) {
-        return PARSER_INIT_FAIL;
-    }
 
     return PARSER_INIT_OK;
 }
