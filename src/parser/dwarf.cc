@@ -151,7 +151,10 @@ void DwarfParser::dump_line_table(std::ostream& o) {
 }
 
 line_number_t DwarfParser::get_associated_line(std::uintptr_t addr) {
-    
+    if (line_table_.find(addr) != line_table_.end())
+        return line_table_[addr];
+
+    return line_table_.upper_bound(addr)->second;
 }
 
 void DwarfParser::destroy(void) {

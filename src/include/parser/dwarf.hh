@@ -28,6 +28,8 @@ public:
     int load_cu_line_table(Dwarf_Die d);
     void dump_line_table(std::ostream& o);
 
+    line_number_t get_associated_line(std::uintptr_t addr);
+
     Dwarf_Error error_;
 private:
     void dies_traversal_rec(Dwarf_Debug dbg, Dwarf_Die die,

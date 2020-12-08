@@ -37,6 +37,7 @@ public:
     void dump_registers(std::ostream& o);
 
     void next_instruction(void) const;
+    line_number_t get_current_line(void) const;
 private:
     std::filesystem::path bin_path_;
     char *bin_name_;
