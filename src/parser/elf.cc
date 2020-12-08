@@ -59,7 +59,7 @@ int ElfParser::init(void) {
 
 void ElfParser::destroy(void) {
     /* XXX yeye check error codes */
-    munmap(ehdr_, sizeof(ElfW(Ehdr)));
+    munmap(ehdr_, size_);
 }
 
 std::shared_ptr<ElfW(Sym)> ElfParser::get_symbol(std::string symbol_name) {
