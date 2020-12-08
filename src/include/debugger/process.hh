@@ -28,7 +28,7 @@ public:
     void continue_exec(void);
     long peek_data(std::uintptr_t addr) const;
     void poke_data(std::uintptr_t addr, std::uintptr_t data) const;
-    void single_step(void);
+    void single_step(void) const;
 
     pid_t get_pid(void) const;
     pstate get_status(void) const;

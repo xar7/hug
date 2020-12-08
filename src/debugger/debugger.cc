@@ -172,3 +172,7 @@ void Debugger::add_breakpoint(std::string symbol_name) {
 
     return add_breakpoint(address);
 }
+
+void Debugger::next_instruction(void) const {
+    inf_.single_step();
+}

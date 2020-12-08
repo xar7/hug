@@ -79,9 +79,8 @@ void Process::poke_data(std::uintptr_t addr, std::uintptr_t data) const {
                 reinterpret_cast<void *>(data));
 }
 
-void Process::single_step(void) {
+void Process::single_step(void) const {
     call_ptrace(PTRACE_SINGLESTEP, nullptr, nullptr);
-    status_ = RUNNING;
 }
 
 pid_t Process::get_pid(void) const {

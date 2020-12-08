@@ -36,6 +36,7 @@ public:
     void set_register_value(reg r, std::uintptr_t value);
     void dump_registers(std::ostream& o);
 
+    void next_instruction(void) const;
 private:
     std::filesystem::path bin_path_;
     char *bin_name_;
