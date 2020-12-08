@@ -42,13 +42,18 @@ int main(int argc, char **argv) {
     if (dp.init() == PARSER_INIT_FAIL) {
         std::cerr << "DwarfParser initialization failed." << std::endl;
     }
-    dp.dies_traversal([&](Dwarf_Die d) -> int {
-        char *die_name = NULL;
-        if (dwarf_diename(d, &die_name, &dp.error_) == 0)
-            std::cout << die_name << '\n';
+    dp.dies_traversal([&](const Dwarf_Die& d) -> int {
+        std::cout << d << '\n';
 
         return 0;
     });
+
+    auto test_dies_a = dp.get_dies_with_name("a");
+    std::for_each(test_dies_a.begin(), test_dies_a.end(),
+                  [](const Dwarf_Die& d) {
+                      std::cout << d << '\n';
+                  });
+
     dp.destroy();
 
     return 0;

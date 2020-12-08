@@ -1,3 +1,4 @@
+#include <cstring>
 #include <fcntl.h>
 #include <iostream>
 #include <stdio.h>
@@ -95,4 +96,30 @@ void DwarfParser::destroy(void) {
     if (close(fd_) < 0) {
         perror("DwarfParserError on close: ");
     }
+}
+
+std::vector<Dwarf_Die> DwarfParser::get_dies_with_name(std::string name) {
+    std::vector<Dwarf_Die> dies;
+
+    dies_traversal([&](Dwarf_Die d) -> int {
+        char *die_name = NULL;
+        if (dwarf_diename(d, &die_name, &error_) == 0) {
+            if (strcmp(die_name, name.c_str()) == 0)
+                dies.push_back(d);
+        }
+
+        return 0;
+    });
+
+    return dies;
+}
+
+std::ostream& operator<<(std::ostream& o, Dwarf_Die d) {
+    char *die_name = NULL;
+    // XXX Not so sure about the use of NULL on Dwarf_Error
+    if (dwarf_diename(d, &die_name, NULL) == 0) {
+        o << die_name;
+    }
+
+    return o;
 }

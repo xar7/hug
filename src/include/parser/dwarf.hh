@@ -17,6 +17,8 @@ public:
     int init(void) override;
     void destroy(void) override;
 
+    std::vector<Dwarf_Die> get_dies_with_name(std::string name);
+
     int dies_traversal(dwarf_die_handler_ptr funcptr);
 
     Dwarf_Error error_;
@@ -32,3 +34,5 @@ private:
 
     std::vector<Dwarf_Die> dies_;
 };
+
+std::ostream& operator<<(std::ostream& o, Dwarf_Die d);
