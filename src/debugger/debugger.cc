@@ -18,7 +18,8 @@
 
 void Debugger::start_inferior(void) {
     LOG("Initializing elf parser for : %s.", bin_name_);
-    elf_.init();
+    elf_ = std::make_unique<DwarfParser>(bin_name_);
+    elf_->init();
     pid_t pid;
 
     pid = fork();
@@ -145,7 +146,7 @@ void Debugger::add_breakpoint(std::uintptr_t address) {
 }
 
 void Debugger::add_breakpoint(std::string symbol_name) {
-    auto sym = elf_.get_symbol(symbol_name);
+    auto sym = elf_->get_symbol(symbol_name);
     if (!sym) {
         ERR("Unable to locate symbol %s in %s.", symbol_name.c_str(), bin_path_.c_str());
         return;
@@ -156,7 +157,7 @@ void Debugger::add_breakpoint(std::string symbol_name) {
     }
 
     std::uintptr_t address = sym->st_value;
-    if (elf_.is_pie()) {
+    if (elf_->is_pie()) {
         auto mapping = std::find(mappings_.begin(), mappings_.end(),
                                  std::filesystem::absolute(bin_path_).string());
         if (mapping == mappings_.end()) {
@@ -173,6 +174,32 @@ void Debugger::add_breakpoint(std::string symbol_name) {
     return add_breakpoint(address);
 }
 
+Mapping Debugger::get_mapping(const std::string& bin) const {
+    auto mapping = std::find(mappings_.begin(), mappings_.end(),
+                             std::filesystem::absolute(bin).string());
+    if (mapping == mappings_.end()) {
+        ERR("Unable to find memory mapping for %s",
+            bin.c_str());
+        _exit(1);
+    }
+
+    return *mapping;
+}
+
 void Debugger::next_instruction(void) const {
     inf_.single_step();
+}
+
+line_number_t Debugger::get_current_line(void) const {
+    reg_t rip = get_register_value(reg::rip);
+
+    auto addr = rip;
+
+    if (elf_->is_pie()) {
+        auto m = get_mapping(std::filesystem::absolute(bin_path_).string());
+
+        addr = rip - m.begin_;
+    }
+
+    return elf_->get_associated_line(addr);
 }

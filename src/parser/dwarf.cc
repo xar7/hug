@@ -40,6 +40,7 @@ int DwarfParser::dies_traversal(dwarf_die_handler_ptr funcptr) {
     Dwarf_Unsigned next_cu_header;
     Dwarf_Die current_die;
 
+    // Browse all the CU
     for (int cu_it = 0;; cu_it++) {
         int res = dwarf_next_cu_header(dbg_, &cu_header_length, &version,
                                        &abbrev_offset, &address_size, &next_cu_header,
@@ -61,6 +62,7 @@ int DwarfParser::dies_traversal(dwarf_die_handler_ptr funcptr) {
             ERR("DwarfParserError: impossible to find CU DIE. This should be unreachable.");
         }
 
+        // For each CU browse all related DIEs
         dies_traversal_rec(dbg_, current_die, funcptr);
     }
 }
@@ -112,6 +114,7 @@ int DwarfParser::load_cu_line_table(Dwarf_Die d) {
         dwarf_errmsg(error_);
     }
 
+    // XXX Probably the worst way to test if we're in a CU DIE
     if (strcmp(tagname, "DW_TAG_compile_unit") != 0) {
         return 0;
     }
@@ -150,9 +153,9 @@ void DwarfParser::dump_line_table(std::ostream& o) {
     }
 }
 
-line_number_t DwarfParser::get_associated_line(std::uintptr_t addr) {
+line_number_t DwarfParser::get_associated_line(std::uintptr_t addr) const {
     if (line_table_.find(addr) != line_table_.end())
-        return line_table_[addr];
+        return line_table_.at(addr);
 
     return line_table_.upper_bound(addr)->second;
 }

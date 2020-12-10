@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
     d.dump_registers(std::cout);
     d.continue_inferior();
     d.wait_inferior();
+    std::cout << d.get_current_line() << std::endl;
     d.continue_inferior();
     d.wait_inferior();
 

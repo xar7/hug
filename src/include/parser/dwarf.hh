@@ -28,7 +28,7 @@ public:
     int load_cu_line_table(Dwarf_Die d);
     void dump_line_table(std::ostream& o);
 
-    line_number_t get_associated_line(std::uintptr_t addr);
+    line_number_t get_associated_line(std::uintptr_t addr) const;
 
     Dwarf_Error error_;
 private:
